@@ -84,38 +84,38 @@ public abstract class Equipment implements EquipmentSubject {
     }
     
     /**
- * Registers an observer to receive equipment updates.
- *
- * @param observer observer to register
- */
-@Override
-public void attach(Observer observer) {
-    if (observer != null && !observers.contains(observer)) {
-        observers.add(observer);
+    * Registers an observer to receive equipment updates.
+    *
+    * @param observer observer to register
+    */
+    @Override
+    public void attach(Observer observer) {
+        if (observer != null && !observers.contains(observer)) {
+            observers.add(observer);
+        }
     }
-}
 
-/**
- * Removes a previously registered observer.
- *
- * @param observer observer to remove
- */
-@Override
-public void detach(Observer observer) {
-    observers.remove(observer);
-}
-
-/**
- * Notifies all currently registered observers about this equipment.
- */
-@Override
-public void notifyObservers() {
-    List<Observer> observerSnapshot = new ArrayList<>(observers);
-
-    for (Observer observer : observerSnapshot) {
-        observer.update(this);
+    /**
+    * Removes a previously registered observer.
+    *
+    * @param observer observer to remove
+    */
+    @Override
+    public void detach(Observer observer) {
+        observers.remove(observer);
     }
-}
+
+    /**
+    * Notifies all currently registered observers about this equipment.
+    */
+    @Override
+    public void notifyObservers() {
+        List<Observer> observerSnapshot = new ArrayList<>(observers);
+
+        for (Observer observer : observerSnapshot) {
+            observer.update(this);
+        }
+    }
 
     /**
      * Gets the equipment database identifier.
