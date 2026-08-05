@@ -1,5 +1,8 @@
 package com.cmsc.model;
-
+import com.cmsc.observer.EquipmentSubject;
+import com.cmsc.observer.Observer;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * Represents shared information and behaviour for equipment in the CMSC.
  * Concrete equipment types such as Printer3D, LaserCutter, and CNCMachine
@@ -7,7 +10,7 @@ package com.cmsc.model;
  *
  * @author Saleh Alhajj
  */
-public abstract class Equipment {
+public abstract class Equipment implements EquipmentSubject {
 
     private int equipmentId;
     private String assetTag;
@@ -18,6 +21,7 @@ public abstract class Equipment {
     private double hoursOfUse;
     private double maintenanceThreshold;
     private double accessCreditRate;
+    private final List<Observer> observers = new ArrayList<>();
 
     /**
      * Creates equipment using the default database values.
@@ -67,13 +71,51 @@ public abstract class Equipment {
     }
 
     /**
-     * Adds completed usage time to the equipment.
-     *
-     * @param hours number of usage hours to add
-     */
+    * Adds operating hours to this equipment and notifies all registered
+    * observers so that maintenance and inventory conditions can be checked.
+    *
+    * @param hours number of operating hours to add
+    */
     public void logUsage(double hours) {
-        this.hoursOfUse += hours;
+        if (hours > 0) {
+            this.hoursOfUse += hours;
+            notifyObservers();
+        }
     }
+    
+    /**
+ * Registers an observer to receive equipment updates.
+ *
+ * @param observer observer to register
+ */
+@Override
+public void attach(Observer observer) {
+    if (observer != null && !observers.contains(observer)) {
+        observers.add(observer);
+    }
+}
+
+/**
+ * Removes a previously registered observer.
+ *
+ * @param observer observer to remove
+ */
+@Override
+public void detach(Observer observer) {
+    observers.remove(observer);
+}
+
+/**
+ * Notifies all currently registered observers about this equipment.
+ */
+@Override
+public void notifyObservers() {
+    List<Observer> observerSnapshot = new ArrayList<>(observers);
+
+    for (Observer observer : observerSnapshot) {
+        observer.update(this);
+    }
+}
 
     /**
      * Gets the equipment database identifier.
