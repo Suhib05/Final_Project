@@ -79,7 +79,7 @@ public class CheckInOutServlet extends HttpServlet {
                            HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        Session activeSession = sessionDAO.findActiveSession(userId, equipmentId);
+        Session activeSession = sessionDAO.findActiveByEquipment(equipmentId);
         if (activeSession == null) {
             request.setAttribute("errorMessage", "No active session found to check out.");
             forwardTo(request, response, "/equipment-status.jsp");
