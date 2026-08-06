@@ -51,6 +51,12 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -71,4 +77,5 @@
             </plugin>
         </plugins>
     </build>
+    <name>Group3_Final_Project</name>
 </project>
