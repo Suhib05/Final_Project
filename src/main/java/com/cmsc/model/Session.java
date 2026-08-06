@@ -64,16 +64,26 @@ public class Session {
     }
 
     /**
-     * Calculates the session duration in hours.
-     *
-     * @return duration in hours, or zero when the session is incomplete
-     */
+    * Calculates the session duration in fractional hours.
+    *
+    * @return elapsed session time in hours
+    */
     public double calculateUsage() {
-        if (startTime == null || endTime == null) {
+        if (startTime == null) {
             return 0.0;
         }
 
-        return Duration.between(startTime, endTime).toSeconds() / 3600.0;
+        LocalDateTime effectiveEndTime
+                = endTime == null ? LocalDateTime.now() : endTime;
+
+        long elapsedMilliseconds = Duration.between(
+                startTime, effectiveEndTime
+        ).toMillis();
+
+        return Math.max(
+                0.0,
+                elapsedMilliseconds / 3_600_000.0
+        );
     }
 
     /**

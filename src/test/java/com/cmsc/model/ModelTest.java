@@ -79,4 +79,22 @@ class ModelTest {
         assertEquals("Replaced spindle belt", log.getDescription());
         assertEquals(200.0, log.getHoursAtService(), 0.001);
     }
+
+ 
+    @Test
+    public void calculatesFractionalSessionHours() {
+        Session session = new Session();
+
+        LocalDateTime startTime
+                = LocalDateTime.of(2026, 8, 5, 10, 0, 0);
+
+        session.setStartTime(startTime);
+        session.setEndTime(startTime.plusSeconds(45));
+
+        assertEquals(
+                0.0125,
+                session.calculateUsage(),
+                0.000001
+            );
+    }
 }
