@@ -40,7 +40,7 @@ public class BookingServlet extends HttpServlet {
             throws ServletException, IOException {
         // Show the booking form, listing available equipment
         request.setAttribute("equipmentList", equipmentDAO.findAll());
-        forwardTo(request, response, "/booking.jsp");
+        forwardTo(request, response, "/WEB-INF/views/booking.jsp");
     }
 
     @Override
@@ -60,14 +60,14 @@ public class BookingServlet extends HttpServlet {
 
         if (equipment == null) {
             request.setAttribute("errorMessage", "Equipment not found.");
-            forwardTo(request, response, "/booking.jsp");
+            forwardTo(request, response, "/WEB-INF/views/booking.jsp");
             return;
         }
 
         if (!"AVAILABLE".equals(equipment.getStatus())) {
             request.setAttribute("errorMessage",
                     "That equipment is currently " + equipment.getStatus() + " and cannot be booked.");
-            forwardTo(request, response, "/booking.jsp");
+            forwardTo(request, response, "/WEB-INF/views/booking.jsp");
             return;
         }
 
@@ -75,13 +75,14 @@ public class BookingServlet extends HttpServlet {
         session.setUserId(userId);
         session.setEquipmentId(equipmentId);
         session.setStartTime(LocalDateTime.now());
+        session.setMaterialsConsumed(0.0);
         sessionDAO.save(session);
 
         equipment.setStatus("IN_USE");
         equipmentDAO.update(equipment);
 
         request.setAttribute("successMessage", "Equipment booked successfully.");
-        forwardTo(request, response, "/booking-confirmation.jsp");
+        forwardTo(request, response, "/WEB-INF/views/booking-confirmation.jsp");
     }
 
     private void forwardTo(HttpServletRequest request, HttpServletResponse response, String path)

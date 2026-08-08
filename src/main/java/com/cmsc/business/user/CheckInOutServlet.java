@@ -22,10 +22,6 @@ import java.time.LocalDateTime;
  * Handles FR-03 check-in/check-out. Reached via FrontControllerServlet
  * (/controller?action=checkinout&mode=checkin|checkout).
  *
- * DEPENDS ON MEMBER 2's Session model, SessionDAO, and EquipmentDAO —
- * will not compile until those exist and match the method signatures
- * used below.
- *
  * @author Suhib
  */
 @WebServlet("/CheckInOutServlet")
@@ -33,6 +29,27 @@ public class CheckInOutServlet extends HttpServlet {
 
     private final SessionDAO sessionDAO = new SessionDAOImpl();
     private final EquipmentDAO equipmentDAO = new EquipmentDAOImpl();
+
+    /**
+     * Someone navigating to the check-in/out screen (via the dashboard
+     * link) rather than submitting the form yet.
+     * @param request
+     * @param response
+     * @throws jakarta.servlet.ServletException
+     * @throws java.io.IOException
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession httpSession = request.getSession(false);
+        if (httpSession == null || httpSession.getAttribute("userId") == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        forwardTo(request, response, "/WEB-INF/views/checkinout.jsp");
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -72,7 +89,7 @@ public class CheckInOutServlet extends HttpServlet {
         equipmentDAO.update(equipment);
 
         request.setAttribute("successMessage", "Checked in successfully.");
-        forwardTo(request, response, "/equipment-status.jsp");
+        forwardTo(request, response, "/WEB-INF/views/equipment-status.jsp");
     }
 
     private void checkOut(int userId, int equipmentId,
@@ -80,9 +97,10 @@ public class CheckInOutServlet extends HttpServlet {
             throws ServletException, IOException {
 
         Session activeSession = sessionDAO.findActiveByEquipment(equipmentId);
-        if (activeSession == null) {
+
+        if (activeSession == null || activeSession.getUserId() != userId) {
             request.setAttribute("errorMessage", "No active session found to check out.");
-            forwardTo(request, response, "/equipment-status.jsp");
+            forwardTo(request, response, "/WEB-INF/views/equipment-status.jsp");
             return;
         }
 
@@ -97,7 +115,7 @@ public class CheckInOutServlet extends HttpServlet {
         equipmentDAO.update(equipment);
 
         request.setAttribute("successMessage", "Checked out successfully.");
-        forwardTo(request, response, "/equipment-status.jsp");
+        forwardTo(request, response, "/WEB-INF/views/equipment-status.jsp");
     }
 
     private double parseDoubleOrZero(String value) {
