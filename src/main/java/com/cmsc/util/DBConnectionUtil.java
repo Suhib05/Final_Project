@@ -13,7 +13,7 @@ import java.util.Properties;
  * its connections through this class rather than hard-coding connection
  * details, so the credentials only live in one place.
  *
- * @author TODO-your-name
+ * @author Group 3
  */
 public final class DBConnectionUtil {
 

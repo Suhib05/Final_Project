@@ -65,7 +65,7 @@ public class FrontControllerServlet extends HttpServlet {
                         .forward(request, response);
                 break;
             case "checkinout":
-                request.getRequestDispatcher("/CheckInOutServlet")
+                request.getRequestDispatcher("/equipment")
                         .forward(request, response);
                 break;
 

@@ -63,6 +63,7 @@
 
     <h2><i class="fa-solid fa-screwdriver-wrench"></i> Campus Maker Space Equipment</h2>
 
+    <c:if test="${sessionScope.userType eq 'SHOP_TECH'}">
     <div style="display:flex; gap:12px; margin-bottom:20px;">
         <a class="btn btn-outline btn-sm" href="${pageContext.request.contextPath}/inventory">
             <i class="fa-solid fa-boxes-stacked"></i> Inventory Report
@@ -71,9 +72,13 @@
             <i class="fa-solid fa-toolbox"></i> Maintenance
         </a>
     </div>
+    </c:if>
 
     <c:if test="${param.registered eq 'true'}">
         <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Equipment registered successfully.</div>
+    </c:if>
+    <c:if test="${param.booking eq 'success'}">
+        <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Equipment booked and checked in successfully.</div>
     </c:if>
     <c:if test="${param.session eq 'checkIn'}">
         <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Equipment check-in completed successfully.</div>
@@ -88,6 +93,7 @@
         <div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i> <c:out value="${errorMessage}"/></div>
     </c:if>
 
+    <c:if test="${sessionScope.userType eq 'SHOP_TECH'}">
     <div class="card">
         <h3><i class="fa-solid fa-plus"></i> Register Equipment</h3>
         <p class="form-hint">This operation is restricted to Shop-Techs and administrators.</p>
@@ -124,6 +130,16 @@
                 </div>
 
                 <div class="form-group">
+                    <i class="fa-solid fa-box-open field-icon"></i>
+                    <select id="consumableType" name="consumableType" class="form-control" required>
+                        <option value="">Select a consumable type</option>
+                        <c:forEach var="consumable" items="${consumableList}">
+                            <option value="${consumable.type}"><c:out value="${consumable.type}"/></option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <i class="fa-solid fa-gauge-high field-icon"></i>
                     <input id="maintenanceThreshold" name="maintenanceThreshold" type="number" min="0.01" step="0.01" class="form-control" placeholder=" " required>
                     <label for="maintenanceThreshold">Maintenance threshold (hours)</label>
@@ -139,6 +155,7 @@
             <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Register Equipment</button>
         </form>
     </div>
+    </c:if>
 
     <div class="card">
         <h3><i class="fa-solid fa-table"></i> Equipment and Active Session Report</h3>
@@ -166,12 +183,13 @@
                                 <th data-sort>Asset Tag <i class="fa-solid fa-sort"></i></th>
                                 <th data-sort>Equipment <i class="fa-solid fa-sort"></i></th>
                                 <th data-sort>Category <i class="fa-solid fa-sort"></i></th>
+                                <th>Consumable Type</th>
                                 <th data-sort>Status <i class="fa-solid fa-sort"></i></th>
                                 <th>Current User</th>
                                 <th>Elapsed Time</th>
                                 <th>Materials Used</th>
                                 <th>Credit Rate</th>
-                                <th>Maintenance</th>
+                                <th>Diagnostic</th>
                                 <th>Session Action</th>
                             </tr>
                         </thead>
@@ -182,6 +200,7 @@
                                     <td><c:out value="${equipment.assetTag}"/></td>
                                     <td><c:out value="${equipment.make}"/> <c:out value="${equipment.model}"/></td>
                                     <td><c:out value="${equipment.category}"/></td>
+                                    <td><c:out value="${equipment.consumableType}"/></td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${equipment.status eq 'AVAILABLE'}">
@@ -197,7 +216,10 @@
                                     </td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${not empty activeSession}">User #<c:out value="${activeSession.userId}"/></c:when>
+                                            <c:when test="${not empty activeSession}">
+                                                <c:out value="${activeUserNamesByEquipment[equipment.equipmentId]}"/>
+                                                <small>(#<c:out value="${activeSession.userId}"/>)</small>
+                                            </c:when>
                                             <c:otherwise>&mdash;</c:otherwise>
                                         </c:choose>
                                     </td>
@@ -214,7 +236,7 @@
                                             <c:when test="${not empty activeSession}">
                                                 <fmt:formatNumber value="${activeSession.materialsConsumed}" maxFractionDigits="2"/>
                                                 <c:if test="${not empty activeSession.consumableId}">
-                                                    <br><small>Consumable #<c:out value="${activeSession.consumableId}"/></small>
+                                                    <br><small><c:out value="${consumableNamesById[activeSession.consumableId]}"/></small>
                                                 </c:if>
                                             </c:when>
                                             <c:otherwise>&mdash;</c:otherwise>
@@ -223,11 +245,14 @@
                                     <td><fmt:formatNumber value="${equipment.accessCreditRate}" maxFractionDigits="2"/> /hr</td>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${equipment.hoursOfUse >= equipment.maintenanceThreshold}">
+                                            <c:when test="${equipment.diagnosticStatus eq 'SERVICE_REQUIRED'}">
                                                 <span class="badge badge-danger"><i class="fa-solid fa-triangle-exclamation"></i> Service required</span>
                                             </c:when>
+                                            <c:when test="${equipment.diagnosticStatus eq 'WARNING'}">
+                                                <span class="badge badge-warning"><i class="fa-solid fa-stethoscope"></i> Warning</span>
+                                            </c:when>
                                             <c:otherwise>
-                                                <span class="badge badge-neutral">No alert</span>
+                                                <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Normal</span>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
@@ -237,8 +262,6 @@
                                                 <form method="post" action="${pageContext.request.contextPath}/sessions" style="min-width:200px;">
                                                     <input type="hidden" name="action" value="checkIn">
                                                     <input type="hidden" name="equipmentId" value="${equipment.equipmentId}">
-                                                    <label style="font-size:12px; display:block; margin-bottom:4px;">User ID</label>
-                                                    <input type="number" name="userId" min="1" class="form-control" style="padding-left:12px; margin-bottom:6px;" required>
                                                     <label style="font-size:12px; display:block; margin-bottom:4px;">Consumable</label>
                                                     <select name="consumableId" class="form-control" style="margin-bottom:8px;">
                                                         <option value="">No consumable</option>
@@ -253,7 +276,10 @@
                                                     <button type="submit" class="btn btn-success btn-sm"><i class="fa-solid fa-right-to-bracket"></i> Check In</button>
                                                 </form>
                                             </c:when>
-                                            <c:when test="${equipment.status eq 'IN_USE' and not empty activeSession}">
+                                            <c:when test="${equipment.status eq 'IN_USE'
+                                                    and not empty activeSession
+                                                    and (sessionScope.userType eq 'SHOP_TECH'
+                                                    or activeSession.userId eq sessionScope.userId)}">
                                                 <form method="post" action="${pageContext.request.contextPath}/sessions" style="min-width:200px;">
                                                     <input type="hidden" name="action" value="checkOut">
                                                     <input type="hidden" name="equipmentId" value="${equipment.equipmentId}">
@@ -261,6 +287,9 @@
                                                     <input type="number" name="materialsConsumed" min="0" step="0.01" value="0" class="form-control" style="padding-left:12px; margin-bottom:8px;" required>
                                                     <button type="submit" class="btn btn-warning btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Check Out</button>
                                                 </form>
+                                            </c:when>
+                                            <c:when test="${equipment.status eq 'IN_USE' and not empty activeSession}">
+                                                <small class="form-hint">In use by another member</small>
                                             </c:when>
                                             <c:when test="${equipment.status eq 'IN_USE'}">
                                                 <small class="form-hint">Active-session details are unavailable.</small>

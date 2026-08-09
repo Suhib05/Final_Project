@@ -68,14 +68,15 @@ public class MaintenanceServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+        if (!authorizeShopTech(request, response)) {
+            return;
+        }
+
         displayMaintenancePage(request, response);
     }
 
     /**
      * Processes maintenance scheduling and completion.
-     *
-     * Role verification will be performed by the shared front controller
-     * after Member 1's authentication module is integrated.
      *
      * @param request HTTP request
      * @param response HTTP response
@@ -87,6 +88,10 @@ public class MaintenanceServlet extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        if (!authorizeShopTech(request, response)) {
+            return;
+        }
 
         try {
             String action = requireParameter(request, "action");
@@ -227,6 +232,7 @@ public class MaintenanceServlet extends HttpServlet {
                     "maintenanceAlerts",
                     maintenanceObserver.getMaintenanceAlerts()
             );
+            request.setAttribute("allEquipment", allEquipment);
             request.setAttribute(
                     "scheduledEquipment",
                     scheduledEquipment
@@ -244,12 +250,36 @@ public class MaintenanceServlet extends HttpServlet {
             }
 
             request.setAttribute("maintenanceAlerts", List.of());
+            request.setAttribute("allEquipment", List.of());
             request.setAttribute("scheduledEquipment", List.of());
             request.setAttribute("maintenanceLogs", List.of());
         }
 
         request.getRequestDispatcher(MAINTENANCE_VIEW)
                 .forward(request, response);
+    }
+
+    private boolean authorizeShopTech(
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return false;
+        }
+
+        if (!"SHOP_TECH".equals(session.getAttribute("userType"))) {
+            response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "Only a Shop-Tech can manage maintenance."
+            );
+            return false;
+        }
+
+        return true;
     }
 
     private String requireParameter(

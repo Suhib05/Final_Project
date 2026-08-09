@@ -1,12 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.cmsc.model;
 
 /**
+ * Roles supported by the CMSC registration and access-control flow.
  *
- * @author DELL
+ * @author Suhib
  */
 public enum UserType {
     USER,

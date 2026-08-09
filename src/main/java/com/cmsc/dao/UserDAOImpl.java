@@ -20,6 +20,12 @@ import java.util.List;
  */
 public class UserDAOImpl implements UserDAO {
 
+    /**
+     * Saves a new user.
+     *
+     * @param user user to save
+     * @return saved user with generated identifier
+     */
     @Override
     public User save(User user) {
         String sql = "INSERT INTO users (name, email, password_hash, user_type, "
@@ -49,6 +55,12 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    /**
+     * Finds a user by database identifier.
+     *
+     * @param id user identifier
+     * @return matching user, or null when absent
+     */
     @Override
     public User findById(int id) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
@@ -70,6 +82,12 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    /**
+     * Finds a user by unique email address.
+     *
+     * @param email email address
+     * @return matching user, or null when absent
+     */
     @Override
     public User findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
@@ -91,6 +109,12 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    /**
+     * Updates an existing user.
+     *
+     * @param user user containing updated values
+     * @return updated user
+     */
     @Override
     public User update(User user) {
         String sql = "UPDATE users SET name = ?, email = ?, password_hash = ?, "
@@ -115,6 +139,11 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    /**
+     * Deletes a user by identifier.
+     *
+     * @param id user identifier
+     */
     @Override
     public void delete(int id) {
         String sql = "DELETE FROM users WHERE user_id = ?";
@@ -130,6 +159,11 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
+    /**
+     * Retrieves every user.
+     *
+     * @return all users
+     */
     @Override
     public List<User> findAll() {
         String sql = "SELECT * FROM users";

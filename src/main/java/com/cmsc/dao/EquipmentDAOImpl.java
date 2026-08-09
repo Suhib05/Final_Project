@@ -24,17 +24,18 @@ public class EquipmentDAOImpl implements EquipmentDAO {
 
     private static final String INSERT_SQL
             = "INSERT INTO equipment "
-            + "(asset_tag, make, model, category, status, hours_of_use, "
-            + "maintenance_threshold, access_credit_rate) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            + "(asset_tag, make, model, category, consumable_type, status, "
+            + "hours_of_use, maintenance_threshold, access_credit_rate) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String FIND_BY_ID_SQL
             = "SELECT * FROM equipment WHERE equipment_id = ?";
 
     private static final String UPDATE_SQL
             = "UPDATE equipment SET asset_tag = ?, make = ?, model = ?, "
-            + "category = ?, status = ?, hours_of_use = ?, "
-            + "maintenance_threshold = ?, access_credit_rate = ? "
+            + "category = ?, consumable_type = ?, status = ?, "
+            + "hours_of_use = ?, maintenance_threshold = ?, "
+            + "access_credit_rate = ? "
             + "WHERE equipment_id = ?";
 
     private static final String DELETE_SQL
@@ -121,7 +122,7 @@ public class EquipmentDAOImpl implements EquipmentDAO {
                 = connection.prepareStatement(UPDATE_SQL)) {
 
             setEquipmentParameters(statement, equipment);
-            statement.setInt(9, equipment.getEquipmentId());
+            statement.setInt(10, equipment.getEquipmentId());
             statement.executeUpdate();
 
             return equipment;
@@ -267,10 +268,11 @@ public class EquipmentDAOImpl implements EquipmentDAO {
         statement.setString(2, equipment.getMake());
         statement.setString(3, equipment.getModel());
         statement.setString(4, equipment.getCategory());
-        statement.setString(5, equipment.getStatus());
-        statement.setDouble(6, equipment.getHoursOfUse());
-        statement.setDouble(7, equipment.getMaintenanceThreshold());
-        statement.setDouble(8, equipment.getAccessCreditRate());
+        statement.setString(5, equipment.getConsumableType());
+        statement.setString(6, equipment.getStatus());
+        statement.setDouble(7, equipment.getHoursOfUse());
+        statement.setDouble(8, equipment.getMaintenanceThreshold());
+        statement.setDouble(9, equipment.getAccessCreditRate());
     }
 
     /**
@@ -279,7 +281,7 @@ public class EquipmentDAOImpl implements EquipmentDAO {
     private Equipment mapEquipment(ResultSet results) throws SQLException {
         String category = results.getString("category");
 
-        return switch (category) {
+        Equipment equipment = switch (category) {
             case "PRINTER_3D" ->
                 new Printer3D(
                         results.getInt("equipment_id"),
@@ -321,5 +323,8 @@ public class EquipmentDAOImpl implements EquipmentDAO {
                         "Unknown equipment category: " + category
                 );
         };
+
+        equipment.setConsumableType(results.getString("consumable_type"));
+        return equipment;
     }
 }

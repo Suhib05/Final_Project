@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  *
  * In NetBeans: right-click this file -> Test File (or Run -> Test Project).
  *
- * @author TODO-your-name
+ * @author Group 3
  */
 class DBConnectionTest {
 
