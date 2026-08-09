@@ -100,6 +100,14 @@ public class FrontControllerServlet extends HttpServlet {
                 request.getRequestDispatcher("/workorders")
                         .forward(request, response);
                 break;
+            case "training":
+                request.getRequestDispatcher("/training")
+                        .forward(request, response);
+                break;
+            case "donations":
+                request.getRequestDispatcher("/donations")
+                        .forward(request, response);
+                break;
 
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND,

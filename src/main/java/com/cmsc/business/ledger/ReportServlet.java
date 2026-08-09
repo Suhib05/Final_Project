@@ -4,6 +4,8 @@ import com.cmsc.dao.ConsumableDAO;
 import com.cmsc.dao.ConsumableDAOImpl;
 import com.cmsc.dao.EquipmentDAO;
 import com.cmsc.dao.EquipmentDAOImpl;
+import com.cmsc.dao.TrainingDAO;
+import com.cmsc.dao.TrainingDAOImpl;
 import com.cmsc.dao.TransactionDAO;
 import com.cmsc.dao.TransactionDAOImpl;
 import com.cmsc.dao.UserDAO;
@@ -51,6 +53,7 @@ public class ReportServlet extends HttpServlet {
 
     private TransactionDAO transactionDAO;
     private WorkOrderDAO workOrderDAO;
+    private TrainingDAO trainingDAO;
     private UserDAO userDAO;
     private EquipmentDAO equipmentDAO;
     private ConsumableDAO consumableDAO;
@@ -63,6 +66,7 @@ public class ReportServlet extends HttpServlet {
     public void init() {
         transactionDAO = new TransactionDAOImpl();
         workOrderDAO = new WorkOrderDAOImpl();
+        trainingDAO = new TrainingDAOImpl();
         userDAO = new UserDAOImpl();
         equipmentDAO = new EquipmentDAOImpl();
         consumableDAO = new ConsumableDAOImpl();
@@ -172,6 +176,13 @@ public class ReportServlet extends HttpServlet {
                             .filter(order -> order.getStatus()
                             == WorkOrderStatus.COMPLETED)
                             .toList());
+        }
+
+        if ("TRAINER".equals(userType)) {
+            request.setAttribute("myTrainings",
+                    trainingDAO.findByTrainerId(userId));
+            request.setAttribute("myTrainingCount",
+                    trainingDAO.countByTrainerId(userId));
         }
     }
 

@@ -4,14 +4,20 @@ import com.cmsc.dao.EquipmentDAO;
 import com.cmsc.dao.EquipmentDAOImpl;
 import com.cmsc.dao.MaintenanceDAO;
 import com.cmsc.dao.MaintenanceDAOImpl;
+import com.cmsc.dao.UserDAO;
+import com.cmsc.dao.UserDAOImpl;
 import com.cmsc.model.Equipment;
 import com.cmsc.model.MaintenanceLog;
+import com.cmsc.model.TransactionSource;
+import com.cmsc.model.User;
 import com.cmsc.observer.MaintenanceObserver;
+import com.cmsc.strategy.LedgerService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,14 +39,19 @@ public class MaintenanceServlet extends HttpServlet {
 
     private EquipmentDAO equipmentDAO;
     private MaintenanceDAO maintenanceDAO;
+    private UserDAO userDAO;
+    private LedgerService ledgerService;
 
     /**
-     * Initializes the DAOs required by this servlet.
+     * Initializes the DAOs required by this servlet, plus the ledger service
+     * used to credit the Shop-Tech for the time they log.
      */
     @Override
     public void init() {
         equipmentDAO = new EquipmentDAOImpl();
         maintenanceDAO = new MaintenanceDAOImpl();
+        userDAO = new UserDAOImpl();
+        ledgerService = new LedgerService();
     }
 
     /**
@@ -121,12 +132,11 @@ public class MaintenanceServlet extends HttpServlet {
     private void completeMaintenance(HttpServletRequest request) {
         Equipment equipment = findRequestedEquipment(request);
 
-        int shopTechId = requirePositiveInteger(
-                request, "shopTechId"
-        );
+        int shopTechId = requireSignedInShopTech(request);
         String description = requireParameter(
                 request, "description"
         );
+        double hoursSpent = requireHoursSpent(request);
 
         MaintenanceLog maintenanceLog = new MaintenanceLog();
         maintenanceLog.setEquipmentId(equipment.getEquipmentId());
@@ -136,11 +146,15 @@ public class MaintenanceServlet extends HttpServlet {
                 equipment.getHoursOfUse()
         );
 
-        if (maintenanceDAO.save(maintenanceLog) == null) {
+        MaintenanceLog savedLog = maintenanceDAO.save(maintenanceLog);
+
+        if (savedLog == null) {
             throw new IllegalStateException(
                     "The maintenance log could not be saved."
             );
         }
+
+        awardMaintenanceCredit(shopTechId, hoursSpent, savedLog.getLogId());
 
         /*
          * hoursOfUse represents component wear since the most recent
@@ -250,6 +264,92 @@ public class MaintenanceServlet extends HttpServlet {
         }
 
         return value.trim();
+    }
+
+    /**
+     * Credits the Shop-Tech for the time they spent on the job.
+     *
+     * The calculation itself belongs to the Ledger module: this servlet only
+     * reports what happened and who did it, and LedgerService selects the
+     * matching credit rule and writes the transaction.
+     *
+     * @param shopTechId Shop-Tech who carried out the work
+     * @param hoursSpent hours of labour logged
+     * @param logId maintenance log the credit relates to
+     */
+    private void awardMaintenanceCredit(int shopTechId, double hoursSpent,
+            int logId) {
+
+        User shopTech = userDAO.findById(shopTechId);
+
+        if (shopTech == null) {
+            throw new IllegalStateException(
+                    "The Shop-Tech account could not be loaded."
+            );
+        }
+
+        ledgerService.awardCredit(shopTech, TransactionSource.MAINTENANCE,
+                hoursSpent, logId);
+    }
+
+    /**
+     * Reads the hours of labour the Shop-Tech is claiming.
+     *
+     * Maintenance is credited by time rather than by job, because the work
+     * varies: clearing a nozzle and rebuilding an axis are both one log. The
+     * figure has to come from the form, since the schema records only the
+     * machine's usage hours at the point of service, not the labour spent.
+     *
+     * @param request request carrying the form values
+     * @return hours spent, greater than zero
+     */
+    private double requireHoursSpent(HttpServletRequest request) {
+        String value = requireParameter(request, "hoursSpent");
+
+        try {
+            double hoursSpent = Double.parseDouble(value);
+
+            if (hoursSpent <= 0) {
+                throw new IllegalArgumentException(
+                        "Hours spent must be greater than zero."
+                );
+            }
+
+            return hoursSpent;
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(
+                    "Hours spent must be a valid number."
+            );
+        }
+    }
+
+    /**
+     * Returns the identifier of the Shop-Tech carrying out the work, taken
+     * from the session rather than from the form.
+     *
+     * The maintenance credit is awarded to whoever this identifies, so it must
+     * not be something the browser can supply. Reading it from the session
+     * means a member can only ever log maintenance against their own account.
+     *
+     * @param request request carrying the session
+     * @return the signed-in Shop-Tech's user identifier
+     */
+    private int requireSignedInShopTech(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("userId") == null) {
+            throw new IllegalArgumentException(
+                    "You must be signed in to log maintenance."
+            );
+        }
+
+        if (!"SHOP_TECH".equals(session.getAttribute("userType"))) {
+            throw new IllegalArgumentException(
+                    "Only a Shop-Tech can log maintenance."
+            );
+        }
+
+        return (Integer) session.getAttribute("userId");
     }
 
     private int requirePositiveInteger(

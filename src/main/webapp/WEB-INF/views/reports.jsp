@@ -47,6 +47,8 @@
     <a class="sidebar-link" href="${pageContext.request.contextPath}/inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
     <a class="sidebar-link" href="${pageContext.request.contextPath}/maintenance"><i class="fa-solid fa-toolbox"></i> Maintenance</a>
     <% } %>
+    <a class="sidebar-link" href="${pageContext.request.contextPath}/donations"><i class="fa-solid fa-hand-holding-heart"></i> Donate</a>
+    <a class="sidebar-link" href="${pageContext.request.contextPath}/training"><i class="fa-solid fa-chalkboard-user"></i> Training</a>
     <a class="sidebar-link" href="${pageContext.request.contextPath}/ledger"><i class="fa-solid fa-money-bill-transfer"></i> My Ledger</a>
     <a class="sidebar-link" href="${pageContext.request.contextPath}/workorders"><i class="fa-solid fa-clipboard-list"></i> Work Orders</a>
     <a class="sidebar-link active" href="${pageContext.request.contextPath}/reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
@@ -135,6 +137,36 @@
                                 <td><c:out value="${entry.transactionDate}"/></td>
                                 <td><c:out value="${entry.source}"/></td>
                                 <td><span class="badge badge-success"><fmt:formatNumber value="${entry.amount}" maxFractionDigits="2"/></span></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </c:if>
+
+    <c:if test="${not empty myTrainings}">
+        <div class="card">
+            <h3><i class="fa-solid fa-chalkboard-user"></i> Training I Delivered</h3>
+            <p class="form-hint">
+                <c:out value="${myTrainingCount}"/> session(s) delivered, each earning a training credit.
+            </p>
+
+            <div class="table-wrapper" data-searchable-table>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Equipment ID</th>
+                            <th data-sort>Delivered <i class="fa-solid fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="training" items="${myTrainings}">
+                            <tr>
+                                <td><c:out value="${training.trainingId}"/></td>
+                                <td><c:out value="${training.equipmentId}"/></td>
+                                <td><c:out value="${training.dateDelivered}"/></td>
                             </tr>
                         </c:forEach>
                     </tbody>

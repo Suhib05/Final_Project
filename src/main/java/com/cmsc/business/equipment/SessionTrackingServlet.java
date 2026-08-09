@@ -6,11 +6,15 @@ import com.cmsc.dao.EquipmentDAO;
 import com.cmsc.dao.EquipmentDAOImpl;
 import com.cmsc.dao.SessionDAO;
 import com.cmsc.dao.SessionDAOImpl;
+import com.cmsc.dao.UserDAO;
+import com.cmsc.dao.UserDAOImpl;
 import com.cmsc.model.Consumable;
 import com.cmsc.model.Equipment;
 import com.cmsc.model.Session;
+import com.cmsc.model.User;
 import com.cmsc.observer.InventoryObserver;
 import com.cmsc.observer.MaintenanceObserver;
+import com.cmsc.strategy.LedgerService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,15 +39,20 @@ public class SessionTrackingServlet extends HttpServlet {
     private EquipmentDAO equipmentDAO;
     private SessionDAO sessionDAO;
     private ConsumableDAO consumableDAO;
+    private UserDAO userDAO;
+    private LedgerService ledgerService;
 
     /**
-     * Initializes the DAOs required for session tracking.
+     * Initializes the DAOs required for session tracking, plus the ledger
+     * service used to charge the member when a session ends.
      */
     @Override
     public void init() {
         equipmentDAO = new EquipmentDAOImpl();
         sessionDAO = new SessionDAOImpl();
         consumableDAO = new ConsumableDAOImpl();
+        userDAO = new UserDAOImpl();
+        ledgerService = new LedgerService();
     }
 
     /**
@@ -230,12 +239,42 @@ public class SessionTrackingServlet extends HttpServlet {
             );
         }
 
-        /*
-         * The completed session now contains the information Member 3 needs
-         * for debit calculation: user, equipment, elapsed hours and materials
-         * consumed. Ledger integration will be performed after Member 3's
-         * service interface is available.
-         */
+        chargeForSession(activeSession, equipment, sessionHours,
+                materialsConsumed);
+    }
+
+    /**
+     * Debits the member for the session they just finished (FR-06).
+     *
+     * The charge is the access hours used multiplied by the equipment's credit
+     * rate, plus the materials consumed. The arithmetic and the ledger write
+     * belong to the Ledger module, so this servlet only supplies the figures.
+     *
+     * @param session the session that has just ended
+     * @param equipment the equipment it ran on, carrying the credit rate
+     * @param sessionHours hours the session ran for
+     * @param materialsConsumed quantity of material used
+     */
+    private void chargeForSession(Session session, Equipment equipment,
+            double sessionHours, double materialsConsumed) {
+
+        if (sessionHours <= 0 && materialsConsumed <= 0) {
+            return;
+        }
+
+        User user = userDAO.findById(session.getUserId());
+
+        if (user == null) {
+            return;
+        }
+
+        ledgerService.recordEquipmentUse(
+                user,
+                sessionHours,
+                equipment.getAccessCreditRate(),
+                materialsConsumed,
+                session.getSessionId()
+        );
     }
 
     private void updateConsumableStock(

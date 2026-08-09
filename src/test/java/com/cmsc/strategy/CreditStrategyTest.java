@@ -48,6 +48,15 @@ class CreditStrategyTest {
     }
 
     @Test
+    void donationEarnsCreditInProportionToQuantity() {
+        CreditStrategy strategy = new DonationCreditStrategy();
+
+        assertEquals(TransactionSource.DONATION, strategy.getSource());
+        assertEquals(DonationCreditStrategy.CREDIT_PER_UNIT * 500,
+                strategy.calculateCredit(500), 0.001);
+    }
+
+    @Test
     void noContributionEarnsNoCredit() {
         assertEquals(0, new TrainingCreditStrategy().calculateCredit(0), 0.001);
         assertEquals(0,
@@ -61,7 +70,8 @@ class CreditStrategyTest {
         CreditStrategy[] rules = {
             new TrainingCreditStrategy(),
             new MaintenanceCreditStrategy(),
-            new WorkOrderCreditStrategy()
+            new WorkOrderCreditStrategy(),
+            new DonationCreditStrategy()
         };
 
         for (CreditStrategy rule : rules) {

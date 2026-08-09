@@ -168,13 +168,13 @@ CREATE INDEX idx_transactions_date ON transactions(transaction_date);
 -- Hashes below are real bcrypt hashes (cost factor 10), generated so
 -- login actually works against this seed data once PasswordUtil is
 -- wired up. Verify compatibility with whichever Java bcrypt library
--- you use (jBCrypt reads $2a$/$2b$ hashes interchangeably).
+-- you use (jBCrypt reads $2a$/$2a$ hashes interchangeably).
 INSERT INTO users (name, email, password_hash, user_type, credit_balance, debit_balance) VALUES
-('Alice Chen',  'alice@algonquin.ca', '$2b$10$AZC7OfZQftpFDFrJk7ENk.GoE/jl1b6YUsbXW6aH99BTmlp17dKEm', 'USER',       5.00, 2.50),
-('Ben Osei',    'ben@algonquin.ca',   '$2b$10$5egSl6B/C2ohmx8q3CikUu/gvE/oGVMICKMhk2sx4lv6VlZIVQUtK', 'TRAINER',   12.00, 0.00),
-('Carla Diaz',  'carla@algonquin.ca', '$2b$10$8CDw/J7gyL6cx4R0MoT5suEOJQOQXg4oZLpababQZ8b52yy8jeuJO', 'SHOP_TECH', 20.00, 0.00),
-('Dev Patel',   'dev@algonquin.ca',   '$2b$10$on3klLxifwsckHupgblbEu98NCgdA9U35fJ0ItxTfD1CoHOs1UtVS', 'USER',       0.00, 8.00),
-('Emma Wright', 'emma@algonquin.ca',  '$2b$10$2O0KeTj6Q4vXIMXl/P0T2uBZXnaxvRsiZ074IovexIc/vqjCEqcLK', 'USER',       3.00, 0.00);
+('Alice Chen',  'alice@algonquin.ca', '$2a$10$AZC7OfZQftpFDFrJk7ENk.GoE/jl1b6YUsbXW6aH99BTmlp17dKEm', 'USER',       5.00, 2.50),
+('Ben Osei',    'ben@algonquin.ca',   '$2a$10$5egSl6B/C2ohmx8q3CikUu/gvE/oGVMICKMhk2sx4lv6VlZIVQUtK', 'TRAINER',   12.00, 0.00),
+('Carla Diaz',  'carla@algonquin.ca', '$2a$10$8CDw/J7gyL6cx4R0MoT5suEOJQOQXg4oZLpababQZ8b52yy8jeuJO', 'SHOP_TECH', 20.00, 0.00),
+('Dev Patel',   'dev@algonquin.ca',   '$2a$10$on3klLxifwsckHupgblbEu98NCgdA9U35fJ0ItxTfD1CoHOs1UtVS', 'USER',       0.00, 8.00),
+('Emma Wright', 'emma@algonquin.ca',  '$2a$10$2O0KeTj6Q4vXIMXl/P0T2uBZXnaxvRsiZ074IovexIc/vqjCEqcLK', 'USER',       3.00, 0.00);
 
 INSERT INTO equipment (asset_tag, make, model, category, status, hours_of_use, maintenance_threshold, access_credit_rate) VALUES
 ('PR3D-001', 'Prusa',    'MK4',       'PRINTER_3D',   'AVAILABLE',            120.5, 250.00, 1.00),
@@ -206,3 +206,13 @@ INSERT INTO transactions (user_id, type, amount, source, reference_id, transacti
 (2, 'CREDIT', 5.00, 'TRAINING',      1, '2026-07-16 09:00:00'),
 (3, 'CREDIT', 6.00, 'MAINTENANCE',   1, '2026-07-17 10:30:00'),
 (4, 'DEBIT',  8.00, 'EQUIPMENT_USE', 2, '2026-07-16 14:30:00');
+
+-- ================================================================
+-- APPLICATION DATABASE ACCOUNT
+-- db.properties connects as cst8288/cst8288, so the account has to
+-- exist wherever this schema is loaded, including the marker's machine.
+-- ================================================================
+
+CREATE USER IF NOT EXISTS 'cst8288'@'localhost' IDENTIFIED BY 'cst8288';
+GRANT ALL PRIVILEGES ON cmsc_db.* TO 'cst8288'@'localhost';
+FLUSH PRIVILEGES;

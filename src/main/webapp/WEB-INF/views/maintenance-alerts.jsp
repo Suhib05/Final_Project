@@ -47,6 +47,8 @@
     <a class="sidebar-link" href="${pageContext.request.contextPath}/inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
     <a class="sidebar-link active" href="${pageContext.request.contextPath}/maintenance"><i class="fa-solid fa-toolbox"></i> Maintenance</a>
     <% } %>
+    <a class="sidebar-link" href="${pageContext.request.contextPath}/donations"><i class="fa-solid fa-hand-holding-heart"></i> Donate</a>
+    <a class="sidebar-link" href="${pageContext.request.contextPath}/training"><i class="fa-solid fa-chalkboard-user"></i> Training</a>
     <a class="sidebar-link" href="${pageContext.request.contextPath}/ledger"><i class="fa-solid fa-money-bill-transfer"></i> My Ledger</a>
     <a class="sidebar-link" href="${pageContext.request.contextPath}/workorders"><i class="fa-solid fa-clipboard-list"></i> Work Orders</a>
     <a class="sidebar-link" href="${pageContext.request.contextPath}/reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
@@ -168,8 +170,8 @@
                                             <input type="hidden" name="action" value="complete">
                                             <input type="hidden" name="equipmentId" value="${equipment.equipmentId}">
 
-                                            <label style="font-size:12px; display:block; margin-bottom:4px;">Shop-Tech user ID</label>
-                                            <input type="number" name="shopTechId" min="1" class="form-control" style="padding-left:12px; margin-bottom:6px;" required>
+                                            <label style="font-size:12px; display:block; margin-bottom:4px;">Hours spent</label>
+                                            <input type="number" name="hoursSpent" min="0.25" step="0.25" class="form-control" style="padding-left:12px; margin-bottom:6px;" required>
 
                                             <label style="font-size:12px; display:block; margin-bottom:4px;">Maintenance description</label>
                                             <textarea name="description" rows="3" class="form-control" style="padding-left:12px; margin-bottom:8px; resize:vertical;" required></textarea>
