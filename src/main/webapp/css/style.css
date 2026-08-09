@@ -156,7 +156,12 @@ a:hover { text-decoration: underline; }
     padding: 28px 32px;
     min-height: calc(100vh - var(--topbar-height));
     transition: margin-left var(--transition);
+    /* Column layout so a short page can push its footer to the bottom
+       instead of leaving it floating under the content. */
+    display: flex;
+    flex-direction: column;
 }
+.app-main > .app-footer { margin-top: auto; }
 .app-main.full-width { margin-left: 0; }
 
 .sidebar-toggle { display: none; }
@@ -301,16 +306,33 @@ a:hover { text-decoration: underline; }
     padding: 0 4px;
 }
 .form-group .form-control:focus + label,
-.form-group .form-control:not(:placeholder-shown) + label {
+.form-group .form-control:not(:placeholder-shown) + label,
+.form-group .form-control:-webkit-autofill + label {
     top: -9px;
     left: 34px;
     font-size: 11.5px;
     color: var(--accent);
 }
+
+/* Chrome paints a saved suggestion into the field before the user accepts
+   it. That preview does not set the field's value, so the label would stay
+   put and sit on top of the suggested text. Matching :-webkit-autofill above
+   lifts the label anyway. The rules below also stop Chrome overriding the
+   field background and text colour with its own. */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-primary) inset;
+    -webkit-text-fill-color: var(--text);
+    caret-color: var(--text);
+}
 .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
 .form-error { font-size: 12.5px; color: var(--danger); margin-top: 5px; }
 
-select.form-control { padding-left: 14px; }
+/* Selects sit in the same .form-group as the absolutely positioned
+   .field-icon, so they need the same left padding as text inputs.
+   Without it the icon lands on top of the first character. */
+select.form-control { padding-left: 40px; }
 
 /* ---------- Alerts / Toasts ---------- */
 .alert {

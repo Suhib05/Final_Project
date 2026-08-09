@@ -71,6 +71,7 @@ public class LedgerService {
         registerStrategy(new TrainingCreditStrategy());
         registerStrategy(new MaintenanceCreditStrategy());
         registerStrategy(new WorkOrderCreditStrategy());
+        registerStrategy(new DonationCreditStrategy());
     }
 
     /**

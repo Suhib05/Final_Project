@@ -40,9 +40,13 @@
     <a class="sidebar-link active" href="controller?action=checkinout"><i class="fa-solid fa-clock"></i> Check In / Out</a>
     <% if (isShopTech) { %>
     <a class="sidebar-link" href="controller?action=equipment"><i class="fa-solid fa-screwdriver-wrench"></i> Equipment</a>
+    <a class="sidebar-link" href="controller?action=inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory</a>
     <a class="sidebar-link" href="controller?action=maintenance"><i class="fa-solid fa-toolbox"></i> Maintenance</a>
     <% } %>
+    <a class="sidebar-link" href="controller?action=donations"><i class="fa-solid fa-hand-holding-heart"></i> Donate</a>
+    <a class="sidebar-link" href="controller?action=training"><i class="fa-solid fa-chalkboard-user"></i> Training</a>
     <a class="sidebar-link" href="controller?action=ledger"><i class="fa-solid fa-money-bill-transfer"></i> My Ledger</a>
+    <a class="sidebar-link" href="controller?action=workorders"><i class="fa-solid fa-clipboard-list"></i> Work Orders</a>
     <a class="sidebar-link" href="controller?action=reports"><i class="fa-solid fa-chart-column"></i> Reports</a>
 </nav>
 

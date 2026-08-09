@@ -1,5 +1,6 @@
 package com.cmsc.dao;
 
+import com.cmsc.model.CNCMachine;
 import com.cmsc.model.Equipment;
 import com.cmsc.model.Printer3D;
 
@@ -40,13 +41,55 @@ class EquipmentDAOTest {
                 = equipmentDAO.findByStatus("AVAILABLE");
 
         assertFalse(available.isEmpty());
+    }
 
-        List<Equipment> requiringMaintenance
-                = equipmentDAO.findRequiringMaintenance();
+    /**
+     * Confirms a machine past its threshold is reported as needing service.
+     *
+     * The test creates its own machine rather than asserting against a seeded
+     * one, because completing maintenance through the application resets the
+     * usage hours. Reading live state made this fail for anyone who had used
+     * the maintenance page.
+     */
+    @Test
+    void reportsEquipmentPastItsMaintenanceThreshold() {
+        String assetTag = "MAINT-" + System.currentTimeMillis();
 
-        assertTrue(requiringMaintenance.stream()
-                .anyMatch(equipment
-                        -> "CNC-001".equals(equipment.getAssetTag())));
+        Equipment overdue = new CNCMachine(
+                0,
+                assetTag,
+                "Test Make",
+                "Test Model",
+                "AVAILABLE",
+                250.0,
+                200.0,
+                2.50
+        );
+
+        Equipment saved = equipmentDAO.save(overdue);
+        int generatedId = saved.getEquipmentId();
+
+        assertTrue(generatedId > 0);
+
+        try {
+            List<Equipment> requiringMaintenance
+                    = equipmentDAO.findRequiringMaintenance();
+
+            assertTrue(requiringMaintenance.stream()
+                    .anyMatch(equipment
+                            -> assetTag.equals(equipment.getAssetTag())),
+                    "Equipment past its threshold should require maintenance");
+
+            saved.setHoursOfUse(0.0);
+            equipmentDAO.update(saved);
+
+            assertFalse(equipmentDAO.findRequiringMaintenance().stream()
+                    .anyMatch(equipment
+                            -> assetTag.equals(equipment.getAssetTag())),
+                    "Serviced equipment should no longer require maintenance");
+        } finally {
+            equipmentDAO.delete(generatedId);
+        }
     }
 
     @Test
