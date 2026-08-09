@@ -4,7 +4,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Wraps jBCrypt so hashing/checking is one line everywhere else in the
- * project. Cost factor 10 matches the seed data hashes in cmsc_schema_FINAL.sql.
+ * project. Cost factor 10 matches the seed data hashes in sql/cmsc_db.sql.
  *
  * @author Suhib
  */
@@ -15,10 +15,23 @@ public final class PasswordUtil {
     private PasswordUtil() {
     }
 
+    /**
+     * Hashes a plain-text password with bcrypt.
+     *
+     * @param plainPassword password supplied by the member
+     * @return bcrypt password hash
+     */
     public static String hash(String plainPassword) {
         return BCrypt.hashpw(plainPassword, BCrypt.gensalt(COST_FACTOR));
     }
 
+    /**
+     * Checks a plain-text password against a stored bcrypt hash.
+     *
+     * @param plainPassword password supplied by the member
+     * @param hashedPassword stored bcrypt hash
+     * @return true when the password matches
+     */
     public static boolean verify(String plainPassword, String hashedPassword) {
         return BCrypt.checkpw(plainPassword, hashedPassword);
     }

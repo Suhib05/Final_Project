@@ -22,10 +22,9 @@ import java.time.LocalDateTime;
  * Handles FR-03 equipment booking. Reached via FrontControllerServlet
  * (/controller?action=booking).
  *
- * DEPENDS ON MEMBER 2's Session model, SessionDAO, and EquipmentDAO —
- * won't compile until those exist. Booking here means "reserve equipment
- * for a future/immediate use"; actual usage tracking (elapsed time,
- * materials) happens in CheckInOutServlet once the session is active.
+ * Booking starts an active session immediately. Usage time and material
+ * consumption are completed through the consolidated equipment session
+ * screen.
  *
  * @author Suhib
  */
@@ -81,8 +80,9 @@ public class BookingServlet extends HttpServlet {
         equipment.setStatus("IN_USE");
         equipmentDAO.update(equipment);
 
-        request.setAttribute("successMessage", "Equipment booked successfully.");
-        forwardTo(request, response, "/WEB-INF/views/booking-confirmation.jsp");
+        response.sendRedirect(
+                request.getContextPath() + "/equipment?booking=success"
+        );
     }
 
     private void forwardTo(HttpServletRequest request, HttpServletResponse response, String path)

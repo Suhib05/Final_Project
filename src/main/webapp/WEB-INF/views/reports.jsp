@@ -240,6 +240,60 @@
                 </div>
             </div>
 
+            <h3 style="margin-top:28px;"><i class="fa-solid fa-screwdriver-wrench"></i> All Equipment</h3>
+            <div class="table-wrapper" data-searchable-table>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th data-sort>Asset Tag <i class="fa-solid fa-sort"></i></th>
+                            <th>Equipment</th>
+                            <th>Category</th>
+                            <th>Consumable Type</th>
+                            <th data-sort>Status <i class="fa-solid fa-sort"></i></th>
+                            <th>Diagnostic</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="machine" items="${equipmentReport.equipment}">
+                            <tr>
+                                <td><c:out value="${machine.assetTag}"/></td>
+                                <td><c:out value="${machine.make}"/> <c:out value="${machine.model}"/></td>
+                                <td><c:out value="${machine.category}"/></td>
+                                <td><c:out value="${machine.consumableType}"/></td>
+                                <td><c:out value="${machine.status}"/></td>
+                                <td><c:out value="${machine.diagnosticStatus}"/></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top:28px;"><i class="fa-solid fa-boxes-stacked"></i> All Consumable Stock</h3>
+            <div class="table-wrapper" data-searchable-table>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th data-sort>Material <i class="fa-solid fa-sort"></i></th>
+                            <th data-sort>Current Stock <i class="fa-solid fa-sort"></i></th>
+                            <th>Unit</th>
+                            <th>Consumption Rate</th>
+                            <th>Reorder At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="item" items="${equipmentReport.consumables}">
+                            <tr>
+                                <td><c:out value="${item.type}"/></td>
+                                <td><fmt:formatNumber value="${item.stockLevel}" maxFractionDigits="2"/></td>
+                                <td><c:out value="${item.unit}"/></td>
+                                <td><fmt:formatNumber value="${item.consumptionRate}" maxFractionDigits="2"/> / day</td>
+                                <td><fmt:formatNumber value="${item.reorderThreshold}" maxFractionDigits="2"/></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+
             <c:if test="${not empty equipmentReport.maintenanceAlerts}">
                 <h3 style="margin-top:28px;"><i class="fa-solid fa-toolbox"></i> Machines Needing Service</h3>
                 <div class="table-wrapper" data-searchable-table>

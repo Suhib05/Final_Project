@@ -79,6 +79,48 @@
     </c:if>
 
     <div class="card">
+        <h3><i class="fa-solid fa-stethoscope"></i> Equipment Diagnostics</h3>
+        <p class="form-hint">Diagnostic status is calculated from current machine state, accumulated usage and the configured maintenance threshold.</p>
+
+        <div class="table-wrapper" data-searchable-table>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th data-sort>Asset Tag <i class="fa-solid fa-sort"></i></th>
+                        <th>Equipment</th>
+                        <th>Usage Hours</th>
+                        <th>Threshold</th>
+                        <th>Diagnostic</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="equipment" items="${allEquipment}">
+                        <tr>
+                            <td><c:out value="${equipment.assetTag}"/></td>
+                            <td><c:out value="${equipment.make}"/> <c:out value="${equipment.model}"/></td>
+                            <td><fmt:formatNumber value="${equipment.hoursOfUse}" maxFractionDigits="2"/></td>
+                            <td><fmt:formatNumber value="${equipment.maintenanceThreshold}" maxFractionDigits="2"/></td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${equipment.diagnosticStatus eq 'SERVICE_REQUIRED'}">
+                                        <span class="badge badge-danger">Service required</span>
+                                    </c:when>
+                                    <c:when test="${equipment.diagnosticStatus eq 'WARNING'}">
+                                        <span class="badge badge-warning">Warning</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge badge-success">Normal</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
         <h3><i class="fa-solid fa-triangle-exclamation"></i> Predictive Maintenance Alerts</h3>
         <p class="form-hint">An alert is generated when equipment usage reaches its configured maintenance threshold.</p>
 

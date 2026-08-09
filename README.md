@@ -1,79 +1,53 @@
-# CMSC — Environment Setup
+# Group3 Final Project — Campus Maker Space Co-op
 
-This is a starter Maven web-app skeleton matching the package structure agreed on for the group project. It builds and deploys, but has no business logic yet — that's step 2 onward.
+This NetBeans Maven web application implements CST8288 Final Project
+requirements FR01–FR06 with Jakarta Servlets/JSP, MySQL, DAO-based data
+access, and the required Builder, Strategy, Simple Factory, Adapter, and
+Observer patterns.
 
-## What's included
-```
-cmsc-webapp/
-├── pom.xml                          # dependencies: Jakarta Servlet, MySQL connector, JSTL, JUnit
-├── sql/cmsc_schema_final.sql        # run this in MySQL before anything else
-├── src/main/java/com/cmsc/
-│   ├── controller/TestServlet.java  # sanity-check servlet — delete once FrontControllerServlet exists
-│   ├── util/DBConnectionUtil.java   # shared DB connection helper — every DAO uses this
-│   ├── model/                       # (empty — your entity classes go here)
-│   ├── dao/                         # (empty)
-│   ├── factory/                     # (empty)
-│   ├── observer/                    # (empty)
-│   ├── builder/                     # (empty — Member 1)
-│   ├── strategy/                    # (empty — Member 3)
-│   ├── adapter/                     # (empty — Member 3)
-│   └── business/{user,equipment,ledger}/   # (empty — servlets go here)
-├── src/main/resources/db.properties # MySQL connection string (cst8288/cst8288)
-├── src/main/webapp/index.jsp        # test page
-├── src/main/webapp/WEB-INF/web.xml
-└── src/test/java/com/cmsc/DBConnectionTest.java   # run this first
-```
+## Required software
 
-## Prerequisites (install these before opening the project)
-1. **JDK 21** or later — `java -version` to confirm
-2. **NetBeans** (latest, with Maven support built in) or IntelliJ with Maven
-3. **MySQL 8.0.40** — running locally, or update `db.properties` if it's remote
-4. **Payara Server 7.2026.6** (or later) — download and register it inside NetBeans under Services → Servers
+- JDK 21
+- NetBeans with Maven support
+- MySQL 8.0.40
+- Payara Server 7.2026.6
 
-## Step-by-step setup
+## Set up the database
 
-### 1. Create the database
-```
-mysql -u root -p < sql/cmsc_schema_FINAL.sql
-```
-This drops and recreates `cmsc_db` with all 8 tables and sample data (including working bcrypt password hashes — all 5 seed accounts use the test password `Password123!`). Re-run it anytime you want a clean slate.
+1. Open MySQL Workbench and connect to the local MySQL server as an account
+   that can create databases and users.
+2. Open `sql/cmsc_db.sql`.
+3. Run the complete script. It recreates `cmsc_db`, inserts the sample data,
+   and creates the required application account `cst8288` / `cst8288`.
+4. Refresh the Schemas panel and confirm that `cmsc_db` contains eight
+   tables.
 
-Then create the `cst8288` MySQL user the assignment requires (if it doesn't already exist):
-```sql
-CREATE USER 'cst8288'@'localhost' IDENTIFIED BY 'cst8288';
-GRANT ALL PRIVILEGES ON cmsc_db.* TO 'cst8288'@'localhost';
-FLUSH PRIVILEGES;
-```
+The application reads its connection settings from
+`src/main/resources/db.properties`.
 
-### 2. Open the project in NetBeans
-File → Open Project → select the `cmsc-webapp` folder (the one with `pom.xml` in it). NetBeans will read the Maven config automatically and download dependencies — first open may take a minute.
+## Open, test, and run
 
-### 3. Register Payara as your server
-Services tab → Servers → right-click → Add Server → Payara Server → point it at your Payara install folder.
-Then: right-click the project → Properties → Run → set Server to Payara.
+1. In NetBeans, select **File > Open Project**.
+2. Select the `Group3_Final_Project` folder containing `pom.xml`.
+3. Right-click the project and select **Clean and Build**.
+4. Confirm that all tests pass and the build ends with `BUILD SUCCESS`.
+5. Right-click the project, select **Properties > Run**, and select Payara.
+6. Right-click the project and select **Run**.
 
-### 4. Verify the database connection works
-Right-click `DBConnectionTest.java` → Test File. If it passes, your `db.properties` credentials are correct and MySQL is reachable. Fix this before writing any DAO code — everything downstream depends on it.
+## Sample accounts
 
-### 5. Run the project
-Right-click the project → Run. NetBeans deploys to Payara and opens a browser.
-- You should see **"CMSC is running"** at the root URL.
-- Click through to `/test` — you should see **"Servlet routing works."**
+All sample accounts use password `Password123!`.
 
-If both of those work, your environment is fully wired up: Maven, Payara, and MySQL are all talking to each other correctly, and you can start writing real code.
+| Role | Email |
+|---|---|
+| User | `alice@algonquin.ca` |
+| Trainer | `ben@algonquin.ca` |
+| Shop-Tech | `carla@algonquin.ca` |
 
-## Naming reminder before final submission
-The assignment requires a specific naming convention for the delivered zip:
-- NetBeans project name: `Group#_Final_Project`
-- Zip file name: `Group#_Final_Project.zip`
+## Submission name
 
-Rename `<artifactId>` and `<finalName>` in `pom.xml` accordingly once your group number is assigned — currently placeholder values.
+- NetBeans/Maven project: `Group3_Final_Project`
+- Final archive: `Group3_Final_Project.zip`
 
-## What NOT to commit to Git
-Add a `.gitignore` with at least:
-```
-target/
-*.class
-.nb-gradle/
-nbproject/private/
-```
+Build output and NetBeans-local configuration files must not be included in
+the submitted archive.

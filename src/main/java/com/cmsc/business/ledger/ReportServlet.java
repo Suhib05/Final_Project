@@ -37,8 +37,8 @@ import java.util.List;
  *
  * What the page shows depends on who is asking. A User sees their own activity;
  * a Trainer or Shop-Tech additionally sees what they have contributed and
- * earned; a Shop-Tech also sees the co-op-wide picture of equipment and stock,
- * because they are the ones who act on it.
+ * earned; Trainers and Shop-Techs also see the co-op-wide picture of equipment
+ * and stock required by FR-06.
  *
  * Ledger figures are aggregated through TransactionDAO, which this module owns.
  * Equipment and stock figures come from the DAOs owned by Member 2; this
@@ -105,7 +105,8 @@ public class ReportServlet extends HttpServlet {
                 buildContributionReport(userId, userType, request);
             }
 
-            if ("SHOP_TECH".equals(userType)) {
+            if ("TRAINER".equals(userType)
+                    || "SHOP_TECH".equals(userType)) {
                 buildCoopReport(request);
             }
         } catch (RuntimeException exception) {
@@ -195,6 +196,7 @@ public class ReportServlet extends HttpServlet {
         EquipmentStatusReport report = new EquipmentStatusReport(
                 equipmentDAO.findAll(),
                 equipmentDAO.findRequiringMaintenance(),
+                consumableDAO.findAll(),
                 consumableDAO.findLowStock()
         );
 

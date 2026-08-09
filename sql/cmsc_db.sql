@@ -1,7 +1,7 @@
 -- ================================================================
 --  CAMPUS MAKER SPACE CO-OP (CMSC) - DATABASE SCHEMA
 --  CST8288 - 26 Spring - Final Project
---  Group #: ____________
+--  Group #: 3
 --  Version: FINAL   |   MySQL: 8.0.40
 -- ================================================================
 --  1. users            - User / Trainer / Shop-Tech accounts   (FR-01)
@@ -23,14 +23,7 @@
 --     tracking is ever required, add a maintenance_alerts table keyed by
 --     equipment_id with raised_at / resolved_at columns.
 --
---  2. Consumables are linked at the Session level (which consumable a
---     specific session used), not at the Equipment level (an equipment's
---     "default" consumable type). FR-02 mentions consumable type as an
---     equipment registration detail, but session-level linking is more
---     flexible (e.g. a printer can use different filament colors across
---     sessions) and still supports FR-04 inventory reporting.
---
---  3. transactions.user_id uses ON DELETE CASCADE, so deleting a user
+--  2. transactions.user_id uses ON DELETE CASCADE, so deleting a user
 --     wipes their transaction history. Acceptable for a school project /
 --     demo dataset; a production ledger would normally use ON DELETE
 --     RESTRICT (or a soft-delete flag on users) to preserve financial
@@ -64,6 +57,7 @@ CREATE TABLE equipment (
     make                  VARCHAR(100)  NOT NULL,
     model                 VARCHAR(100)  NOT NULL,
     category              ENUM('PRINTER_3D','LASER_CUTTER','CNC') NOT NULL,
+    consumable_type       VARCHAR(100)  NOT NULL DEFAULT 'Not specified',
     status                ENUM('AVAILABLE','IN_USE','DOWN_FOR_MAINTENANCE') NOT NULL DEFAULT 'AVAILABLE',
     hours_of_use          DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     maintenance_threshold DECIMAL(10,2) NOT NULL DEFAULT 200.00,
@@ -168,7 +162,7 @@ CREATE INDEX idx_transactions_date ON transactions(transaction_date);
 -- Hashes below are real bcrypt hashes (cost factor 10), generated so
 -- login actually works against this seed data once PasswordUtil is
 -- wired up. Verify compatibility with whichever Java bcrypt library
--- you use (jBCrypt reads $2a$/$2a$ hashes interchangeably).
+-- you use (the included jBCrypt library accepts these $2a$ hashes).
 INSERT INTO users (name, email, password_hash, user_type, credit_balance, debit_balance) VALUES
 ('Alice Chen',  'alice@algonquin.ca', '$2a$10$AZC7OfZQftpFDFrJk7ENk.GoE/jl1b6YUsbXW6aH99BTmlp17dKEm', 'USER',       5.00, 2.50),
 ('Ben Osei',    'ben@algonquin.ca',   '$2a$10$5egSl6B/C2ohmx8q3CikUu/gvE/oGVMICKMhk2sx4lv6VlZIVQUtK', 'TRAINER',   12.00, 0.00),
@@ -176,36 +170,41 @@ INSERT INTO users (name, email, password_hash, user_type, credit_balance, debit_
 ('Dev Patel',   'dev@algonquin.ca',   '$2a$10$on3klLxifwsckHupgblbEu98NCgdA9U35fJ0ItxTfD1CoHOs1UtVS', 'USER',       0.00, 8.00),
 ('Emma Wright', 'emma@algonquin.ca',  '$2a$10$2O0KeTj6Q4vXIMXl/P0T2uBZXnaxvRsiZ074IovexIc/vqjCEqcLK', 'USER',       3.00, 0.00);
 
-INSERT INTO equipment (asset_tag, make, model, category, status, hours_of_use, maintenance_threshold, access_credit_rate) VALUES
-('PR3D-001', 'Prusa',    'MK4',       'PRINTER_3D',   'AVAILABLE',            120.5, 250.00, 1.00),
-('PR3D-002', 'Bambu',    'X1C',       'PRINTER_3D',   'IN_USE',                45.0, 250.00, 1.00),
-('LSR-001',  'Epilog',   'Fusion Pro','LASER_CUTTER', 'AVAILABLE',             80.0, 300.00, 2.00),
-('CNC-001',  'Shapeoko', 'Pro',       'CNC',          'DOWN_FOR_MAINTENANCE', 200.0, 200.00, 2.50);
+INSERT INTO equipment (asset_tag, make, model, category, consumable_type, status, hours_of_use, maintenance_threshold, access_credit_rate) VALUES
+('PR3D-001', 'Prusa',    'MK4',       'PRINTER_3D',   'PLA Filament', 'AVAILABLE',            120.5, 250.00, 1.00),
+('PR3D-002', 'Bambu',    'X1C',       'PRINTER_3D',   'PLA Filament', 'AVAILABLE',             45.0, 250.00, 1.00),
+('LSR-001',  'Epilog',   'Fusion Pro','LASER_CUTTER', 'Laser Lens',   'AVAILABLE',             80.0, 300.00, 2.00),
+('CNC-001',  'Shapeoko', 'Pro',       'CNC',          'Cutting Bit',  'DOWN_FOR_MAINTENANCE', 200.0, 200.00, 2.50);
 
 INSERT INTO consumables (type, unit, stock_level, consumption_rate, reorder_threshold) VALUES
 ('PLA Filament', 'g',    5000.00, 50.00, 500.00),
 ('Resin',        'ml',    800.00, 20.00, 100.00),
-('Laser Lens',   'unit',    3.00,  0.10,   1.00);
+('Laser Lens',   'unit',    3.00,  0.10,   1.00),
+('Cutting Bit',  'unit',   12.00,  0.20,   2.00);
 
 INSERT INTO sessions (user_id, equipment_id, consumable_id, start_time, end_time, materials_consumed) VALUES
-(1, 2, 1,    '2026-07-15 09:00:00', '2026-07-15 11:00:00', 120.00),
-(4, 3, NULL, '2026-07-16 13:00:00', '2026-07-16 14:30:00',   0.00);
+(1, 2, 1,    '2026-08-02 09:00:00', '2026-08-02 11:00:00', 120.00),
+(4, 3, NULL, '2026-08-03 13:00:00', '2026-08-03 14:30:00',   0.00);
 
 INSERT INTO maintenance_logs (equipment_id, shop_tech_id, date_logged, description, hours_at_service) VALUES
-(4, 3, '2026-07-17 10:00:00', 'Replaced spindle belt, recalibrated axes', 200.0);
+(4, 3, '2026-08-04 10:00:00', 'Replaced spindle belt, recalibrated axes', 200.0);
 
 INSERT INTO work_orders (requester_name, is_external, description, status, assigned_shop_tech_id, date_submitted) VALUES
-('Emma Wright',          FALSE, 'Cut 5 acrylic panels for enclosure', 'IN_PROGRESS', 3,    '2026-07-14 10:00:00'),
-('Ottawa Robotics Club', TRUE,  'Print 10 custom mounting brackets',  'SUBMITTED',    NULL, '2026-07-18 09:00:00');
+('Emma Wright',          FALSE, 'Cut 5 acrylic panels for enclosure', 'IN_PROGRESS', 3,    '2026-08-01 10:00:00'),
+('Ottawa Robotics Club', TRUE,  'Print 10 custom mounting brackets',  'SUBMITTED',    NULL, '2026-08-05 09:00:00');
 
 INSERT INTO trainings (trainer_id, equipment_id, date_delivered) VALUES
-(2, 1, '2026-07-16 09:00:00');
+(2, 1, '2026-08-03 09:00:00');
 
 INSERT INTO transactions (user_id, type, amount, source, reference_id, transaction_date) VALUES
-(1, 'DEBIT',  2.50, 'EQUIPMENT_USE', 1, '2026-07-15 11:00:00'),
-(2, 'CREDIT', 5.00, 'TRAINING',      1, '2026-07-16 09:00:00'),
-(3, 'CREDIT', 6.00, 'MAINTENANCE',   1, '2026-07-17 10:30:00'),
-(4, 'DEBIT',  8.00, 'EQUIPMENT_USE', 2, '2026-07-16 14:30:00');
+(1, 'DEBIT',   2.50, 'EQUIPMENT_USE', 1,    '2026-08-02 11:00:00'),
+(1, 'CREDIT',  5.00, 'DONATION',      NULL, '2026-08-01 12:00:00'),
+(2, 'CREDIT',  5.00, 'TRAINING',      1,    '2026-08-03 09:00:00'),
+(2, 'CREDIT',  7.00, 'DONATION',      NULL, '2026-08-01 12:30:00'),
+(3, 'CREDIT',  6.00, 'MAINTENANCE',   1,    '2026-08-04 10:30:00'),
+(3, 'CREDIT', 14.00, 'DONATION',      NULL, '2026-08-01 13:00:00'),
+(4, 'DEBIT',   8.00, 'EQUIPMENT_USE', 2,    '2026-08-03 14:30:00'),
+(5, 'CREDIT',  3.00, 'DONATION',      NULL, '2026-08-01 13:30:00');
 
 -- ================================================================
 -- APPLICATION DATABASE ACCOUNT

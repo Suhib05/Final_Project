@@ -20,6 +20,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -88,6 +89,16 @@ public class SessionTrackingServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
+            HttpSession httpSession = request.getSession(false);
+
+            if (httpSession == null
+                    || httpSession.getAttribute("userId") == null) {
+                response.sendRedirect(
+                        request.getContextPath() + "/login.jsp"
+                );
+                return;
+            }
+
             String action = requireParameter(request, "action");
 
             switch (action) {
@@ -116,7 +127,7 @@ public class SessionTrackingServlet extends HttpServlet {
     }
 
     private void checkIn(HttpServletRequest request) {
-        int userId = requirePositiveInteger(request, "userId");
+        int userId = getSignedInUserId(request);
         int equipmentId = requirePositiveInteger(
                 request, "equipmentId"
         );
@@ -198,6 +209,19 @@ public class SessionTrackingServlet extends HttpServlet {
         if (activeSession == null) {
             throw new IllegalArgumentException(
                     "No active session exists for this equipment."
+            );
+        }
+
+        HttpSession httpSession = request.getSession(false);
+        int signedInUserId = getSignedInUserId(request);
+        boolean isShopTech = "SHOP_TECH".equals(
+                httpSession.getAttribute("userType")
+        );
+
+        if (!isShopTech
+                && activeSession.getUserId() != signedInUserId) {
+            throw new IllegalArgumentException(
+                    "You can only check out your own equipment session."
             );
         }
 
@@ -332,6 +356,18 @@ public class SessionTrackingServlet extends HttpServlet {
                 request.getContextPath()
                 + "/equipment?sessionError=" + encodedMessage
         );
+    }
+
+    private int getSignedInUserId(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("userId") == null) {
+            throw new IllegalArgumentException(
+                    "You must be signed in to manage a session."
+            );
+        }
+
+        return (Integer) session.getAttribute("userId");
     }
 
     private String requireParameter(

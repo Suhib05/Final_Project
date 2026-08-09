@@ -17,6 +17,7 @@ public class EquipmentStatusReport {
 
     private List<Equipment> equipment = new ArrayList<>();
     private List<Equipment> maintenanceAlerts = new ArrayList<>();
+    private List<Consumable> consumables = new ArrayList<>();
     private List<Consumable> lowStockConsumables = new ArrayList<>();
 
     /**
@@ -30,14 +31,17 @@ public class EquipmentStatusReport {
      *
      * @param equipment every machine in the space
      * @param maintenanceAlerts machines past their maintenance threshold
+     * @param consumables every tracked consumable and its current stock
      * @param lowStockConsumables materials at or below their reorder level
      */
     public EquipmentStatusReport(List<Equipment> equipment,
             List<Equipment> maintenanceAlerts,
+            List<Consumable> consumables,
             List<Consumable> lowStockConsumables) {
 
         setEquipment(equipment);
         setMaintenanceAlerts(maintenanceAlerts);
+        setConsumables(consumables);
         setLowStockConsumables(lowStockConsumables);
     }
 
@@ -159,6 +163,25 @@ public class EquipmentStatusReport {
     public final void setMaintenanceAlerts(List<Equipment> maintenanceAlerts) {
         this.maintenanceAlerts = maintenanceAlerts == null
                 ? new ArrayList<>() : maintenanceAlerts;
+    }
+
+    /**
+     * Returns every tracked consumable with its current stock information.
+     *
+     * @return complete consumable list
+     */
+    public List<Consumable> getConsumables() {
+        return consumables;
+    }
+
+    /**
+     * Sets the complete consumable list for the report.
+     *
+     * @param consumables complete consumable list
+     */
+    public final void setConsumables(List<Consumable> consumables) {
+        this.consumables = consumables == null
+                ? new ArrayList<>() : consumables;
     }
 
     /**

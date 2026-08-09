@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,6 +56,21 @@ public class InventoryServlet extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        if (!"SHOP_TECH".equals(session.getAttribute("userType"))) {
+            response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "Only a Shop-Tech can open the inventory report."
+            );
+            return;
+        }
 
         try {
             List<Consumable> consumables = consumableDAO.findAll();

@@ -17,6 +17,7 @@ public abstract class Equipment implements EquipmentSubject {
     private String make;
     private String model;
     private String category;
+    private String consumableType;
     private String status;
     private double hoursOfUse;
     private double maintenanceThreshold;
@@ -28,6 +29,7 @@ public abstract class Equipment implements EquipmentSubject {
      */
     protected Equipment() {
         this.status = "AVAILABLE";
+        this.consumableType = "Not specified";
         this.hoursOfUse = 0.0;
         this.maintenanceThreshold = 200.0;
         this.accessCreditRate = 1.0;
@@ -55,6 +57,7 @@ public abstract class Equipment implements EquipmentSubject {
         this.make = make;
         this.model = model;
         this.category = category;
+        this.consumableType = "Not specified";
         this.status = status;
         this.hoursOfUse = hoursOfUse;
         this.maintenanceThreshold = maintenanceThreshold;
@@ -208,6 +211,24 @@ public abstract class Equipment implements EquipmentSubject {
     }
 
     /**
+     * Gets the consumable type registered for this equipment.
+     *
+     * @return registered consumable type
+     */
+    public String getConsumableType() {
+        return consumableType;
+    }
+
+    /**
+     * Sets the consumable type registered for this equipment.
+     *
+     * @param consumableType registered consumable type
+     */
+    public void setConsumableType(String consumableType) {
+        this.consumableType = consumableType;
+    }
+
+    /**
      * Gets the current equipment status.
      *
      * @return current status
@@ -280,6 +301,27 @@ public abstract class Equipment implements EquipmentSubject {
     }
 
     /**
+     * Returns a simple diagnostic based on equipment state and accumulated
+     * usage. This supports the maintenance screen without storing duplicate
+     * diagnostic state in the database.
+     *
+     * @return NORMAL, WARNING, or SERVICE_REQUIRED
+     */
+    public String getDiagnosticStatus() {
+        if ("DOWN_FOR_MAINTENANCE".equals(status)
+                || hoursOfUse >= maintenanceThreshold) {
+            return "SERVICE_REQUIRED";
+        }
+
+        if (maintenanceThreshold > 0
+                && hoursOfUse >= maintenanceThreshold * 0.8) {
+            return "WARNING";
+        }
+
+        return "NORMAL";
+    }
+
+    /**
      * Returns a readable description of the equipment.
      *
      * @return equipment description
@@ -292,6 +334,7 @@ public abstract class Equipment implements EquipmentSubject {
                 + ", make='" + make + '\''
                 + ", model='" + model + '\''
                 + ", category='" + category + '\''
+                + ", consumableType='" + consumableType + '\''
                 + ", status='" + status + '\''
                 + ", hoursOfUse=" + hoursOfUse
                 + ", maintenanceThreshold=" + maintenanceThreshold

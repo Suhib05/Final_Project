@@ -19,21 +19,45 @@ public class UserBuilder {
     private String passwordHash;
     private UserType userType = UserType.USER;
 
+    /**
+     * Sets the member's name.
+     *
+     * @param name member name
+     * @return this builder
+     */
     public UserBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
+    /**
+     * Sets the member's email address.
+     *
+     * @param email member email
+     * @return this builder
+     */
     public UserBuilder setEmail(String email) {
         this.email = email;
         return this;
     }
 
+    /**
+     * Sets the member's hashed password.
+     *
+     * @param passwordHash bcrypt password hash
+     * @return this builder
+     */
     public UserBuilder setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
         return this;
     }
 
+    /**
+     * Sets the member's selected role.
+     *
+     * @param userType member role
+     * @return this builder
+     */
     public UserBuilder setUserType(UserType userType) {
         this.userType = userType;
         return this;
@@ -42,6 +66,8 @@ public class UserBuilder {
     /**
      * Assembles the final User. Throws if a required field was never
      * set, so a caller can't accidentally build a broken/incomplete User.
+     *
+     * @return fully constructed user
      */
     public User build() {
         if (name == null || email == null || passwordHash == null) {
