@@ -212,6 +212,6 @@ INSERT INTO transactions (user_id, type, amount, source, reference_id, transacti
 -- exist wherever this schema is loaded, including the marker's machine.
 -- ================================================================
 
-
+CREATE USER IF NOT EXISTS 'cst8288'@'localhost' IDENTIFIED BY 'cst8288';
 GRANT ALL PRIVILEGES ON cmsc_db.* TO 'cst8288'@'localhost';
 FLUSH PRIVILEGES;
